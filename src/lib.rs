@@ -160,7 +160,7 @@ mod tests {
 
         assert_json_eq!(json1, json2)
     }
-/*
+
     #[test]
     fn failed_event_test() {
         let nonce = U128(238);
@@ -170,10 +170,14 @@ mod tests {
             account: validator_id,
         }
         .emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_failed_event","data":[{"nonce":"238","account":"alice"}]}"#
-        );
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_failed_event","data":[{"nonce":"238","account":"alice"}]}"#;
+
+        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
+        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+
+        assert_json_eq!(json1, json2)
     }
 
     #[test]
@@ -196,10 +200,14 @@ mod tests {
             recipient: token_address,
         }
         .emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":[{"nonce":"238","valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}]}"#
-        );
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":[{"nonce":"238","valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}]}"#;
+
+        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
+        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+
+        assert_json_eq!(json1, json2)
     }
 
     #[test]
@@ -211,9 +219,13 @@ mod tests {
             account: validator_id,
         }
         .emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":[{"nonce":"238","account":"alice"}]}"#
-        );
-    }*/
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":[{"nonce":"238","account":"alice"}]}"#;
+
+        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
+        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+
+        assert_json_eq!(json1, json2)
+    }
 }
