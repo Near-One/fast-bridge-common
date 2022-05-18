@@ -19,57 +19,57 @@ pub struct Proof {
     pub proof: Vec<Vec<u8>>,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
     token: EthAddress,
     amount: U128,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataNear {
     pub token: AccountId,
     pub amount: U128,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "event", content = "data")]
 #[serde(rename_all = "snake_case")]
 #[allow(clippy::enum_variant_names)]
 #[allow(dead_code)]
-pub enum Event<'a> {
+pub enum Event {
     SpectreBridgeNonceEvent {
-        nonce: &'a U128,
-        account: &'a AccountId,
-        transfer: &'a TransferDataEthereum,
-        recipient: &'a EthAddress,
+        nonce: U128,
+        account: AccountId,
+        transfer: TransferDataEthereum,
+        recipient: EthAddress,
     },
     SpectreBridgeTransferEvent {
-        nonce: &'a U128,
+        nonce: U128,
         valid_till: u64,
-        transfer: &'a TransferDataNear,
-        fee: &'a TransferDataNear,
-        recipient: &'a EthAddress,
+        transfer: TransferDataNear,
+        fee: TransferDataNear,
+        recipient: EthAddress,
     },
     SpectreBridgeTransferFailedEvent {
-        nonce: &'a U128,
-        account: &'a AccountId,
+        nonce: U128,
+        account: AccountId,
     },
     SpectreBridgeUnlockEvent {
-        nonce: &'a U128,
-        account: &'a AccountId,
+        nonce: U128,
+        account: AccountId,
     },
     SpectreBridgeDepositEvent {
-        account: &'a AccountId,
-        token: &'a AccountId,
-        amount: &'a U128,
+        account: AccountId,
+        token: AccountId,
+        amount: U128,
     },
     SpectreBridgeEthProoverNotProofedEvent {
-        sender: &'a String,
-        nonce: &'a U128,
-        proof: &'a Proof,
+        sender: String,
+        nonce: U128,
+        proof: Proof,
     },
 }
 
@@ -82,7 +82,7 @@ pub fn get_eth_address(address: String) -> EthAddress {
     result
 }
 
-impl Event<'_> {
+impl Event {
     #[allow(dead_code)]
     pub fn emit(&self) {
         emit_event(&self);
@@ -95,7 +95,7 @@ pub struct EventMessage {
     pub standard: String,
     pub version: String,
     pub event: serde_json::Value,
-    pub data: serde_json::Value,
+    pub data: [serde_json::Value; 1],
 }
 
 #[allow(dead_code)]
@@ -105,7 +105,7 @@ pub(crate) fn emit_event<T: ?Sized + Serialize>(data: &T) {
         standard: STANDARD.to_string(),
         version: VERSION.to_string(),
         event: result["event"].clone(),
-        data: result["data"].clone(),
+        data: [result["data"].clone()]
     })
     .to_string();
     log!(format!("EVENT_JSON:{}", event_json));
