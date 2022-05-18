@@ -1,0 +1,15 @@
+[package]
+name = "transfer-event-custon-logs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "4.0.0-pre.7"
+serde = { version = "1.0"}
+hex = "0.4.2"
+
+[dev-dependencies]
+near-sdk-sim = "3.1.1"
