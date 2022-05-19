@@ -12,7 +12,7 @@ pub const EVENT_JSON_STR: &str = "EVENT_JSON:";
 
 pub type EthAddress = [u8; 20];
 
-#[derive(Default, BorshDeserialize, BorshSerialize, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, BorshDeserialize, BorshSerialize, Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Proof {
     pub log_index: u64,
     pub log_entry_data: Vec<u8>,
@@ -22,21 +22,21 @@ pub struct Proof {
     pub proof: Vec<Vec<u8>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
     token: EthAddress,
     amount: U128,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataNear {
     pub token: AccountId,
     pub amount: U128,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "event", content = "data")]
 #[serde(rename_all = "snake_case")]
