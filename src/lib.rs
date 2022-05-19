@@ -85,9 +85,12 @@ pub fn get_eth_address(address: String) -> EthAddress {
     result
 }
 
-pub fn remove_prefix<'a>(event_str: &'a str) -> std::option::Option<&'a str> {
+pub fn remove_prefix<'a>(event_str: &'a str) -> std::option::Option<serde_json::Value> {
     if event_str.starts_with(EVENT_JSON_STR) {
-        return Some(&event_str[EVENT_JSON_STR.len()..]);
+        let r = serde_json::from_str::<serde_json::Value>(&event_str[EVENT_JSON_STR.len()..]);
+        if r.is_ok() {
+            return Some(r.unwrap());
+        }
     }
     None
 }
@@ -105,7 +108,7 @@ pub struct EventMessage {
     pub standard: String,
     pub version: String,
     pub event: serde_json::Value,
-    pub data: [serde_json::Value; 1],
+    pub data: serde_json::Value
 }
 
 #[allow(dead_code)]
@@ -115,7 +118,7 @@ pub(crate) fn emit_event<T: ?Sized + Serialize>(data: &T) {
         standard: STANDARD.to_string(),
         version: VERSION.to_string(),
         event: result["event"].clone(),
-        data: [result["data"].clone()]
+        data: result["data"].clone()
     })
     .to_string();
     log!(format!("{}{}", EVENT_JSON_STR, event_json));
@@ -153,10 +156,10 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_nonce_event","data":[{"nonce":"238","account":"alice","transfer":{"token":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}]}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_nonce_event","data":{"nonce":"238","account":"alice","transfer":{"token":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
 
-        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
-        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
 
         assert_json_eq!(json1, json2)
     }
@@ -172,10 +175,10 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_failed_event","data":[{"nonce":"238","account":"alice"}]}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_failed_event","data":{"nonce":"238","account":"alice"}}"#;
 
-        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
-        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
 
         assert_json_eq!(json1, json2)
     }
@@ -202,10 +205,10 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":[{"nonce":"238","valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}]}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":{"nonce":"238","valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
 
-        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
-        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
 
         assert_json_eq!(json1, json2)
     }
@@ -221,10 +224,10 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":[{"nonce":"238","account":"alice"}]}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","account":"alice"}}"#;
 
-        let json1 = serde_json::from_str::<serde_json::Value>(remove_prefix(&log_data_str).unwrap()).unwrap();
-        let json2 = serde_json::from_str::<serde_json::Value>(remove_prefix(&expected_result_str).unwrap()).unwrap();
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
 
         assert_json_eq!(json1, json2)
     }
