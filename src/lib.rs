@@ -146,7 +146,7 @@ mod tests {
         let amount = U128(100);
         let token_address = get_eth_address();
         Event::SpectreBridgeNonceEvent {
-            nonce: nonce,
+            nonce,
             account: validator_id,
             transfer: TransferDataEthereum { token: token_address, amount },
             recipient: token_address,
@@ -166,7 +166,7 @@ mod tests {
         let nonce = U128(238);
         let validator_id = alice();
         Event::SpectreBridgeTransferFailedEvent {
-            nonce: nonce,
+            nonce,
             account: validator_id,
         }.emit();
 
@@ -186,7 +186,7 @@ mod tests {
         let token_address = get_eth_address();
         let amount: u128 = 100;
         Event::SpectreBridgeTransferEvent {
-            nonce: nonce,
+            nonce,
             chain_id: 5,
             valid_till: 0,
             transfer: TransferDataNear { token: validator_id.clone(), amount: U128(amount) },
@@ -208,7 +208,7 @@ mod tests {
         let nonce = U128(238);
         let validator_id = alice();
         Event::SpectreBridgeUnlockEvent {
-            nonce: nonce,
+            nonce,
             account: validator_id,
         }.emit();
 
