@@ -9,6 +9,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 near-sdk = "4.0.0-pre.7"
 serde = { version = "1.0"}
+assert-json-diff = "2.0.1"
 hex = "0.4.2"
 
 [dev-dependencies]

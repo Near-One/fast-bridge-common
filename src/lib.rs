@@ -2,10 +2,13 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{
     json_types::U128, log, serde::Deserialize, serde::Serialize, serde_json, AccountId,
 };
+use serde::de::Unexpected::Option;
 use serde_json::json;
+use assert_json_diff::assert_json_eq;
 
 pub const STANDARD: &str = "nep297";
 pub const VERSION: &str = "1.0.0";
+pub const EVENT_JSON_STR: &str = "EVENT_JSON:";
 
 pub type EthAddress = [u8; 20];
 
@@ -19,58 +22,58 @@ pub struct Proof {
     pub proof: Vec<Vec<u8>>,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
     token: EthAddress,
     amount: U128,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataNear {
     pub token: AccountId,
     pub amount: U128,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(crate = "near_sdk::serde")]
 #[serde(tag = "event", content = "data")]
 #[serde(rename_all = "snake_case")]
 #[allow(clippy::enum_variant_names)]
 #[allow(dead_code)]
-pub enum Event<'a> {
+pub enum Event {
     SpectreBridgeNonceEvent {
-        nonce: &'a U128,
-        account: &'a AccountId,
-        transfer: &'a TransferDataEthereum,
-        recipient: &'a EthAddress,
+        nonce: U128,
+        account: AccountId,
+        transfer: TransferDataEthereum,
+        recipient: EthAddress,
     },
     SpectreBridgeTransferEvent {
-        nonce: &'a U128,
+        nonce: U128,
         chain_id: u32,
         valid_till: u64,
-        transfer: &'a TransferDataNear,
-        fee: &'a TransferDataNear,
-        recipient: &'a EthAddress,
+        transfer: TransferDataNear,
+        fee: TransferDataNear,
+        recipient: EthAddress,
     },
     SpectreBridgeTransferFailedEvent {
-        nonce: &'a U128,
-        account: &'a AccountId,
+        nonce: U128,
+        account: AccountId,
     },
     SpectreBridgeUnlockEvent {
-        nonce: &'a U128,
-        account: &'a AccountId,
+        nonce: U128,
+        account: AccountId,
     },
     SpectreBridgeDepositEvent {
-        account: &'a AccountId,
-        token: &'a AccountId,
-        amount: &'a U128,
+        account: AccountId,
+        token: AccountId,
+        amount: U128,
     },
     SpectreBridgeEthProoverNotProofedEvent {
-        sender: &'a String,
-        nonce: &'a U128,
-        proof: &'a Proof,
+        sender: String,
+        nonce: U128,
+        proof: Proof,
     },
 }
 
@@ -83,7 +86,17 @@ pub fn get_eth_address(address: String) -> EthAddress {
     result
 }
 
-impl Event<'_> {
+pub fn remove_prefix<'a>(event_str: &'a str) -> std::option::Option<serde_json::Value> {
+    if event_str.starts_with(EVENT_JSON_STR) {
+        let r = serde_json::from_str::<serde_json::Value>(&event_str[EVENT_JSON_STR.len()..]);
+        if r.is_ok() {
+            return Some(r.unwrap());
+        }
+    }
+    None
+}
+
+impl Event {
     #[allow(dead_code)]
     pub fn emit(&self) {
         emit_event(&self);
@@ -96,7 +109,7 @@ pub struct EventMessage {
     pub standard: String,
     pub version: String,
     pub event: serde_json::Value,
-    pub data: serde_json::Value,
+    pub data: serde_json::Value
 }
 
 #[allow(dead_code)]
@@ -106,10 +119,10 @@ pub(crate) fn emit_event<T: ?Sized + Serialize>(data: &T) {
         standard: STANDARD.to_string(),
         version: VERSION.to_string(),
         event: result["event"].clone(),
-        data: result["data"].clone(),
+        data: result["data"].clone()
     })
-    .to_string();
-    log!(format!("EVENT_JSON:{}", event_json));
+        .to_string();
+    log!(format!("{}{}", EVENT_JSON_STR, event_json));
 }
 
 #[cfg(test)]
@@ -128,67 +141,83 @@ mod tests {
 
     #[test]
     fn nonce_event_test() {
-        let nonce = &U128(238);
-        let validator_id = &alice();
+        let nonce = U128(238);
+        let validator_id = alice();
         let amount = U128(100);
         let token_address = get_eth_address();
         Event::SpectreBridgeNonceEvent {
-            nonce,
+            nonce: nonce,
             account: validator_id,
-            transfer: &TransferDataEthereum { token: token_address, amount },
-            recipient: &token_address,
+            transfer: TransferDataEthereum { token: token_address, amount },
+            recipient: token_address,
         }.emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_nonce_event","data":{"nonce":"238","account":"alice","transfer":{"token":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#
-        );
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_nonce_event","data":{"nonce":"238","account":"alice","transfer":{"token":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
+
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
+
+        assert_json_eq!(json1, json2)
     }
 
     #[test]
     fn failed_event_test() {
-        let nonce = &U128(238);
-        let validator_id = &alice();
+        let nonce = U128(238);
+        let validator_id = alice();
         Event::SpectreBridgeTransferFailedEvent {
-            nonce,
+            nonce: nonce,
             account: validator_id,
         }.emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_failed_event","data":[{"nonce":"238","account":"alice"}]}"#
-        );
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_failed_event","data":{"nonce":"238","account":"alice"}}"#;
+
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
+
+        assert_json_eq!(json1, json2)
     }
 
     #[test]
     fn transfer_event_test() {
-        let nonce = &U128(238);
+        let nonce = U128(238);
         let validator_id = alice();
         let token_address = get_eth_address();
         let amount: u128 = 100;
         Event::SpectreBridgeTransferEvent {
-            nonce,
+            nonce: nonce,
             chain_id: 5,
             valid_till: 0,
-            transfer: &TransferDataNear { token: validator_id.clone(), amount: U128(amount) },
-            fee: &TransferDataNear { token: validator_id, amount: U128(amount) },
-            recipient: &token_address,
+            transfer: TransferDataNear { token: validator_id.clone(), amount: U128(amount) },
+            fee: TransferDataNear { token: validator_id, amount: U128(amount) },
+            recipient: token_address,
         }.emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":[{"nonce":"238","chain_id":5,"valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}]}"#
-        );
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":{"nonce":"238","chain_id":5,"valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
+
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
+
+        assert_json_eq!(json1, json2)
     }
 
     #[test]
     fn unlock_event_test() {
-        let nonce = &U128(238);
+        let nonce = U128(238);
         let validator_id = alice();
         Event::SpectreBridgeUnlockEvent {
-            nonce,
-            account: &validator_id,
+            nonce: nonce,
+            account: validator_id,
         }.emit();
-        assert_eq!(
-            test_utils::get_logs()[0],
-            r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":[{"nonce":"238","account":"alice"}]}"#
-        );
+
+        let log_data_str = &test_utils::get_logs()[0];
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","account":"alice"}}"#;
+
+        let json1 = remove_prefix(&log_data_str).unwrap();
+        let json2 = remove_prefix(&expected_result_str).unwrap();
+
+        assert_json_eq!(json1, json2)
     }
 }
