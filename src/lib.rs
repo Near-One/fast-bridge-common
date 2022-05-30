@@ -71,7 +71,6 @@ pub enum Event {
         amount: U128,
     },
     SpectreBridgeEthProoverNotProofedEvent {
-        sender: String,
         nonce: U128,
         proof: Proof,
     },
