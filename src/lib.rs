@@ -25,7 +25,8 @@ pub struct Proof {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
-    token: EthAddress,
+    token_near: AccountId,
+    token_eth: EthAddress,
     amount: U128,
 }
 
@@ -133,6 +134,10 @@ mod tests {
         AccountId::new_unchecked("alice".to_string())
     }
 
+    fn token() -> AccountId {
+        AccountId::new_unchecked("token".to_string())
+    }
+
     fn get_eth_address() -> EthAddress {
         let address: String = "71C7656EC7ab88b098defB751B7401B5f6d8976F".to_string();
         super::get_eth_address(address)
@@ -141,13 +146,17 @@ mod tests {
     #[test]
     fn nonce_event_test() {
         let nonce = U128(238);
-        let validator_id = alice();
+        let token = token();
         let amount = U128(100);
         let token_address = get_eth_address();
         Event::SpectreBridgeNonceEvent {
             nonce: nonce,
             account: validator_id,
-            transfer: TransferDataEthereum { token: token_address, amount },
+            transfer: TransferDataEthereum {
+                token_near: token,
+                token_eth: token_address,
+                amount,
+            },
             recipient: token_address,
         }.emit();
 
