@@ -25,9 +25,9 @@ pub struct Proof {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
-    token_near: AccountId,
-    token_eth: EthAddress,
-    amount: U128,
+    pub token_near: AccountId,
+    pub token_eth: EthAddress,
+    pub amount: U128,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
