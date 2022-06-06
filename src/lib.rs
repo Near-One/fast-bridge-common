@@ -25,9 +25,9 @@ pub struct Proof {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
-    token_near: AccountId,
-    token_eth: EthAddress,
-    amount: U128,
+    pub token_near: AccountId,
+    pub token_eth: EthAddress,
+    pub amount: U128,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -44,23 +44,13 @@ pub struct TransferDataNear {
 #[allow(clippy::enum_variant_names)]
 #[allow(dead_code)]
 pub enum Event {
-    SpectreBridgeNonceEvent {
-        nonce: U128,
-        account: AccountId,
-        transfer: TransferDataEthereum,
-        recipient: EthAddress,
-    },
     SpectreBridgeTransferEvent {
         nonce: U128,
         chain_id: u32,
         valid_till: u64,
-        transfer: TransferDataNear,
+        transfer: TransferDataEthereum,
         fee: TransferDataNear,
         recipient: EthAddress,
-    },
-    SpectreBridgeTransferFailedEvent {
-        nonce: U128,
-        account: AccountId,
     },
     SpectreBridgeUnlockEvent {
         nonce: U128,
@@ -199,13 +189,13 @@ mod tests {
             nonce,
             chain_id: 5,
             valid_till: 0,
-            transfer: TransferDataNear { token: validator_id.clone(), amount: U128(amount) },
+            transfer: TransferDataEthereum { token_near: validator_id.clone(), token_eth: token_address, amount: U128(amount) },
             fee: TransferDataNear { token: validator_id, amount: U128(amount) },
             recipient: token_address,
         }.emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":{"nonce":"238","chain_id":5,"valid_till":0,"transfer":{"token":"alice","amount":"100"},"fee":{"token":"alice","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":{"nonce":"238","chain_id":5,"valid_till":0,"transfer":{"token_near":"alice.near","token_eth": [113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"fee":{"token":"alice.near","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
@@ -223,7 +213,7 @@ mod tests {
         }.emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","account":"alice"}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","account":"alice.near"}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
