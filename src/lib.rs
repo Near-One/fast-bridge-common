@@ -22,7 +22,7 @@ pub struct Proof {
     pub proof: Vec<Vec<u8>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataEthereum {
     pub token_near: AccountId,
@@ -30,7 +30,7 @@ pub struct TransferDataEthereum {
     pub amount: U128,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataNear {
     pub token: AccountId,
@@ -99,7 +99,7 @@ pub struct EventMessage {
     pub standard: String,
     pub version: String,
     pub event: serde_json::Value,
-    pub data: serde_json::Value
+    pub data: serde_json::Value,
 }
 
 #[allow(dead_code)]
