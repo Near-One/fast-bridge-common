@@ -11,9 +11,7 @@ pub const EVENT_JSON_STR: &str = "EVENT_JSON:";
 
 pub type EthAddress = [u8; 20];
 
-#[derive(
-    Default, BorshDeserialize, BorshSerialize, Debug, Clone, Serialize, Deserialize, PartialEq,
-)]
+#[derive(Default, BorshDeserialize, BorshSerialize, Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Proof {
     pub log_index: u64,
     pub log_entry_data: Vec<u8>,
@@ -112,7 +110,7 @@ pub(crate) fn emit_event<T: ?Sized + Serialize>(data: &T) {
         event: result["event"].clone(),
         data: result["data"].clone()
     })
-    .to_string();
+        .to_string();
     log!(format!("{}{}", EVENT_JSON_STR, event_json));
 }
 
@@ -148,7 +146,7 @@ mod tests {
             },
             recipient: token_address,
         }
-        .emit();
+            .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
         let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_transfer_event","data":{"nonce":"238","chain_id":5,"valid_till":0,"transfer":{"token_near":"alice.near","token_eth": [113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"fee":{"token":"alice.near","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
@@ -167,7 +165,7 @@ mod tests {
             nonce,
             account: validator_id,
         }
-        .emit();
+            .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
         let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","account":"alice.near"}}"#;
