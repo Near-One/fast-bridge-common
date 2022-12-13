@@ -1,6 +1,6 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{
-    json_types::U128, log, serde::Deserialize, serde::Serialize, serde_json, AccountId,
+    json_types::U128, log, require, serde::Deserialize, serde::Serialize, serde_json, AccountId,
 };
 use serde_json::json;
 
@@ -69,11 +69,10 @@ pub enum Event {
 
 #[allow(dead_code)]
 pub fn get_eth_address(address: String) -> EthAddress {
-    let data = hex::decode(address).expect("address should be a valid hex string.");
-    assert_eq!(data.len(), 20, "address should be 20 bytes long");
-    let mut result = [0u8; 20];
-    result.copy_from_slice(&data);
-    result
+    let data = hex::decode(address)
+        .unwrap_or_else(|_| near_sdk::env::panic_str("address should be a valid hex string."));
+    require!(data.len() == 20, "address should be 20 bytes long");
+    data.try_into().unwrap()
 }
 
 pub fn remove_prefix(event_str: &str) -> std::option::Option<serde_json::Value> {
