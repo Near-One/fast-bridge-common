@@ -51,6 +51,7 @@ pub enum Event {
         transfer: TransferDataEthereum,
         fee: TransferDataNear,
         recipient: EthAddress,
+        valid_till_block_height: u64,
     },
     SpectreBridgeUnlockEvent {
         nonce: U128,
@@ -125,7 +126,7 @@ mod tests {
     }
 
     fn get_eth_address() -> EthAddress {
-        let address: String = "71C7656EC7ab88b098defB751B7401B5f6d8976F".to_string();
+        let address: String = "71C7656EC7ab88b098defB751B7401B5f6d8976FFF".to_string();
         super::get_eth_address(address)
     }
 
