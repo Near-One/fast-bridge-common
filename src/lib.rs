@@ -46,7 +46,6 @@ pub struct TransferDataNear {
 pub enum Event {
     SpectreBridgeInitTransferEvent {
         nonce: U128,
-        chain_id: u32,
         valid_till: u64,
         transfer: TransferDataEthereum,
         fee: TransferDataNear,
@@ -137,7 +136,6 @@ mod tests {
         let amount: u128 = 100;
         Event::SpectreBridgeInitTransferEvent {
             nonce,
-            chain_id: 5,
             valid_till: 0,
             transfer: TransferDataEthereum {
                 token_near: validator_id.clone(),
@@ -153,7 +151,7 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_init_transfer_event","data":{"nonce":"238","chain_id":5,"valid_till":0,"transfer":{"token_near":"alice.near","token_eth": [113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"fee":{"token":"alice.near","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_init_transfer_event","data":{"nonce":"238","valid_till":0,"transfer":{"token_near":"alice.near","token_eth": [113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111],"amount":"100"},"fee":{"token":"alice.near","amount":"100"},"recipient":[113,199,101,110,199,171,136,176,152,222,251,117,27,116,1,181,246,216,151,111]}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
