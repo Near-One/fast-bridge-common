@@ -41,12 +41,12 @@ pub struct TransferDataNear {
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferMessage {
-    valid_till: u64,
-    transfer: TransferDataEthereum,
-    fee: TransferDataNear,
+    pub valid_till: u64,
+    pub transfer: TransferDataEthereum,
+    pub fee: TransferDataNear,
     #[serde(with = "hex::serde")]
-    recipient: EthAddress,
-    valid_till_block_height: Option<u64>,
+    pub recipient: EthAddress,
+    pub valid_till_block_height: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
