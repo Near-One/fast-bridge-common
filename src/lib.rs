@@ -143,7 +143,6 @@ mod tests {
     #[test]
     fn transfer_event_test() {
         let nonce = U128(238);
-        let validator_id = alice();
         let token_address = get_eth_address();
         let amount: u128 = 100;
         let sender_id = "sender.near".parse().unwrap();
@@ -155,21 +154,21 @@ mod tests {
                 valid_till: 0,
                 valid_till_block_height: Some(0),
                 transfer: TransferDataEthereum {
-                    token_near: validator_id.clone(),
+                    token_near: token(),
                     token_eth: token_address,
                     amount: U128(amount),
                 },
                 fee: TransferDataNear {
-                    token: validator_id,
+                    token: token(),
                     amount: U128(amount),
                 },
-                recipient: token_address,
+                recipient: get_eth_address(),
             },
         }
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_init_transfer_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"alice.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"alice.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_init_transfer_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
@@ -180,7 +179,6 @@ mod tests {
     #[test]
     fn unlock_event_test() {
         let nonce = U128(238);
-        let validator_id = alice();
         let token_address = get_eth_address();
         let amount: u128 = 100;
         let sender_id = "sender.near".parse().unwrap();
@@ -192,21 +190,21 @@ mod tests {
                 valid_till: 0,
                 valid_till_block_height: Some(0),
                 transfer: TransferDataEthereum {
-                    token_near: validator_id.clone(),
+                    token_near: token(),
                     token_eth: token_address,
                     amount: U128(amount),
                 },
                 fee: TransferDataNear {
-                    token: validator_id,
+                    token: token(),
                     amount: U128(amount),
                 },
-                recipient: token_address,
+                recipient: get_eth_address(),
             },
         }
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","unlock_recipient":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"alice.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"alice.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","unlock_recipient":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
