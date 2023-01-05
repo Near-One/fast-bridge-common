@@ -63,16 +63,16 @@ pub enum Event {
     },
     SpectreBridgeUnlockEvent {
         nonce: U128,
-        unlock_recipient: AccountId,
+        sender_id: AccountId,
         transfer_message: TransferMessage,
     },
     SpectreBridgeLpUnlockEvent {
         nonce: U128,
-        unlock_recipient: AccountId,
+        sender_id: AccountId,
         transfer_message: TransferMessage,
     },
     SpectreBridgeDepositEvent {
-        account: AccountId,
+        sender_id: AccountId,
         token: AccountId,
         amount: U128,
     },
@@ -185,7 +185,7 @@ mod tests {
 
         Event::SpectreBridgeUnlockEvent {
             nonce,
-            unlock_recipient: sender_id,
+            sender_id,
             transfer_message: TransferMessage {
                 valid_till: 0,
                 valid_till_block_height: Some(0),
@@ -204,7 +204,7 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","unlock_recipient":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
@@ -218,13 +218,13 @@ mod tests {
         let token = token();
         let amount = 300;
         Event::SpectreBridgeDepositEvent {
-            account,
+            sender_id: account,
             token,
             amount: U128(amount),
         }
         .emit();
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_deposit_event","data":{"account":"alice.near","token":"token.near","amount":"300"}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_deposit_event","data":{"sender_id":"alice.near","token":"token.near","amount":"300"}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
