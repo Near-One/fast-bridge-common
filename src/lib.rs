@@ -68,7 +68,7 @@ pub enum Event {
     },
     SpectreBridgeLpUnlockEvent {
         nonce: U128,
-        sender_id: AccountId,
+        receiver_id: AccountId,
         transfer_message: TransferMessage,
     },
     SpectreBridgeDepositEvent {
