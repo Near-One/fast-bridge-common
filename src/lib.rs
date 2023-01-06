@@ -63,12 +63,12 @@ pub enum Event {
     },
     SpectreBridgeUnlockEvent {
         nonce: U128,
-        sender_id: AccountId,
+        recipient_id: AccountId,
         transfer_message: TransferMessage,
     },
     SpectreBridgeLpUnlockEvent {
         nonce: U128,
-        receiver_id: AccountId,
+        recipient_id: AccountId,
         transfer_message: TransferMessage,
     },
     SpectreBridgeDepositEvent {
@@ -181,11 +181,11 @@ mod tests {
         let nonce = U128(238);
         let token_address = get_eth_address();
         let amount: u128 = 100;
-        let sender_id = "sender.near".parse().unwrap();
+        let recipient_id = "recipient.near".parse().unwrap();
 
         Event::SpectreBridgeUnlockEvent {
             nonce,
-            sender_id,
+            recipient_id,
             transfer_message: TransferMessage {
                 valid_till: 0,
                 valid_till_block_height: Some(0),
@@ -204,7 +204,7 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","recipient_id":"recipient.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
