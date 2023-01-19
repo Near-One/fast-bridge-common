@@ -56,22 +56,22 @@ pub struct TransferMessage {
 #[allow(clippy::enum_variant_names)]
 #[allow(dead_code)]
 pub enum Event {
-    SpectreBridgeInitTransferEvent {
+    FastBridgeInitTransferEvent {
         nonce: U128,
         sender_id: AccountId,
         transfer_message: TransferMessage,
     },
-    SpectreBridgeUnlockEvent {
+    FastBridgeUnlockEvent {
         nonce: U128,
         recipient_id: AccountId,
         transfer_message: TransferMessage,
     },
-    SpectreBridgeLpUnlockEvent {
+    FastBridgeLpUnlockEvent {
         nonce: U128,
         recipient_id: AccountId,
         transfer_message: TransferMessage,
     },
-    SpectreBridgeDepositEvent {
+    FastBridgeDepositEvent {
         sender_id: AccountId,
         token: AccountId,
         amount: U128,
@@ -147,7 +147,7 @@ mod tests {
         let amount: u128 = 100;
         let sender_id = "sender.near".parse().unwrap();
 
-        Event::SpectreBridgeInitTransferEvent {
+        Event::FastBridgeInitTransferEvent {
             nonce,
             sender_id,
             transfer_message: TransferMessage {
@@ -168,7 +168,7 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_init_transfer_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_init_transfer_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
@@ -183,7 +183,7 @@ mod tests {
         let amount: u128 = 100;
         let recipient_id = "recipient.near".parse().unwrap();
 
-        Event::SpectreBridgeUnlockEvent {
+        Event::FastBridgeUnlockEvent {
             nonce,
             recipient_id,
             transfer_message: TransferMessage {
@@ -204,7 +204,7 @@ mod tests {
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_unlock_event","data":{"nonce":"238","recipient_id":"recipient.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_unlock_event","data":{"nonce":"238","recipient_id":"recipient.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
@@ -217,14 +217,14 @@ mod tests {
         let account = alice();
         let token = token();
         let amount = 300;
-        Event::SpectreBridgeDepositEvent {
+        Event::FastBridgeDepositEvent {
             sender_id: account,
             token,
             amount: U128(amount),
         }
         .emit();
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"spectre_bridge_deposit_event","data":{"sender_id":"alice.near","token":"token.near","amount":"300"}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_deposit_event","data":{"sender_id":"alice.near","token":"token.near","amount":"300"}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();

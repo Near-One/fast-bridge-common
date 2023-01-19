@@ -1,2 +1,2 @@
-# spectre-bridge-common
-cargo with common code for both protocol and service
+# fast-bridge-common
+Common code for Fast Bridge protocol and service.
