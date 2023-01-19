@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: spectre-bridge-common
+  name: fast-bridge-common
   description: |
     Common code for both fast-bridge protocol & service
   tags:
@@ -15,4 +15,4 @@ spec:
   owner: bridge-team
   type: contract-library
   lifecycle: production
-  system: spectre-bridge
+  system: fast-bridge
