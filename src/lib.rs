@@ -76,6 +76,11 @@ pub enum Event {
         token: AccountId,
         amount: U128,
     },
+    FastBridgeWithdrawEvent {
+        recipient_id: AccountId,
+        token: AccountId,
+        amount: U128,
+    },
 }
 
 #[allow(dead_code)]
