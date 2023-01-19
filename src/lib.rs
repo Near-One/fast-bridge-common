@@ -77,7 +77,7 @@ pub enum Event {
         amount: U128,
     },
     FastBridgeWithdrawEvent {
-        receiver_id: AccountId,
+        recipient_id: AccountId,
         token: AccountId,
         amount: U128,
     },
