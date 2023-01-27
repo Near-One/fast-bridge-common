@@ -34,7 +34,7 @@ pub struct TransferDataEthereum {
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferDataNear {
-    pub token: AccountId,
+    pub token: Option<AccountId>,
     pub amount: U128,
 }
 
@@ -164,7 +164,7 @@ mod tests {
                     amount: U128(amount),
                 },
                 fee: TransferDataNear {
-                    token: token(),
+                    token: Some(token()),
                     amount: U128(amount),
                 },
                 recipient: get_eth_address(),
@@ -200,7 +200,7 @@ mod tests {
                     amount: U128(amount),
                 },
                 fee: TransferDataNear {
-                    token: token(),
+                    token: Some(token()),
                     amount: U128(amount),
                 },
                 recipient: get_eth_address(),
