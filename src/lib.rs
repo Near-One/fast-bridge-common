@@ -47,6 +47,7 @@ pub struct TransferMessage {
     #[serde(with = "hex::serde")]
     pub recipient: EthAddress,
     pub valid_till_block_height: Option<u64>,
+    pub aurora_sender: Option<EthAddress>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
