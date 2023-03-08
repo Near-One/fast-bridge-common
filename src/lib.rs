@@ -1,6 +1,8 @@
+use hex::FromHex;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{
-    json_types::U128, log, require, serde::Deserialize, serde::Serialize, serde_json, AccountId,
+    json_types::U128, log, require, serde::Deserialize, serde::Deserializer, serde::Serialize,
+    serde::Serializer, serde_json, AccountId,
 };
 use serde_json::json;
 
@@ -47,7 +49,36 @@ pub struct TransferMessage {
     #[serde(with = "hex::serde")]
     pub recipient: EthAddress,
     pub valid_till_block_height: Option<u64>,
+    #[serde(
+        serialize_with = "serialize_hex_option_eth_address",
+        deserialize_with = "deserialize_hex_option_eth_address"
+    )]
     pub aurora_sender: Option<EthAddress>,
+}
+
+fn serialize_hex_option_eth_address<S>(
+    v: &Option<EthAddress>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match v {
+        Some(eth_address) => serializer.serialize_some(&hex::encode(eth_address)),
+        None => serializer.serialize_none(),
+    }
+}
+
+fn deserialize_hex_option_eth_address<'de, D>(
+    deserializer: D,
+) -> Result<Option<EthAddress>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match Deserialize::deserialize(deserializer)? {
+        Some(hex_str) => Ok(Some(EthAddress::from_hex::<String>(hex_str).unwrap())),
+        None => Ok(None),
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -169,12 +200,13 @@ mod tests {
                     amount: U128(amount),
                 },
                 recipient: get_eth_address(),
+                aurora_sender: Some(EthAddress::default()),
             },
         }
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_init_transfer_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_init_transfer_event","data":{"nonce":"238","sender_id":"sender.near","transfer_message":{"aurora_sender":"0000000000000000000000000000000000000000","valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
@@ -205,12 +237,13 @@ mod tests {
                     amount: U128(amount),
                 },
                 recipient: get_eth_address(),
+                aurora_sender: Some(EthAddress::default()),
             },
         }
         .emit();
 
         let log_data_str = &test_utils::get_logs()[0];
-        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_unlock_event","data":{"nonce":"238","recipient_id":"recipient.near","transfer_message":{"valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
+        let expected_result_str = r#"EVENT_JSON:{"standard":"nep297","version":"1.0.0","event":"fast_bridge_unlock_event","data":{"nonce":"238","recipient_id":"recipient.near","transfer_message":{"aurora_sender":"0000000000000000000000000000000000000000","valid_till":0,"valid_till_block_height":0,"transfer":{"token_near":"token.near","token_eth": "71c7656ec7ab88b098defb751b7401b5f6d8976f","amount":"100"},"fee":{"token":"token.near","amount":"100"},"recipient": "71c7656ec7ab88b098defb751b7401b5f6d8976f"}}}"#;
 
         let json1 = remove_prefix(log_data_str).unwrap();
         let json2 = remove_prefix(expected_result_str).unwrap();
