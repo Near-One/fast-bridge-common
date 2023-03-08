@@ -10,7 +10,7 @@ pub const VERSION: &str = "1.0.0";
 pub const EVENT_JSON_STR: &str = "EVENT_JSON:";
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
-pub struct EthAddress([u8; 20]);
+pub struct EthAddress(pub [u8; 20]);
 
 impl<'de> Deserialize<'de> for EthAddress {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as serde::Deserializer<'de>>::Error>
