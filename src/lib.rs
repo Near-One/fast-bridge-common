@@ -9,7 +9,7 @@ pub const STANDARD: &str = "nep297";
 pub const VERSION: &str = "1.0.0";
 pub const EVENT_JSON_STR: &str = "EVENT_JSON:";
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Copy, PartialEq)]
 pub struct EthAddress(pub [u8; 20]);
 
 impl<'de> Deserialize<'de> for EthAddress {
