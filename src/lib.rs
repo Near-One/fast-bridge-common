@@ -62,7 +62,7 @@ pub struct TransferDataNear {
     pub amount: U128,
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, BorshSerialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferMessage {
     pub valid_till: u64,
@@ -71,6 +71,19 @@ pub struct TransferMessage {
     pub recipient: EthAddress,
     pub valid_till_block_height: Option<u64>,
     pub aurora_sender: Option<EthAddress>,
+}
+
+impl BorshDeserialize for TransferMessage {
+    fn deserialize(data: &mut &[u8]) -> crate::borsh::maybestd::io::Result<Self> {
+        Ok(TransferMessage {
+            valid_till: <u64 as BorshDeserialize>::deserialize(data)?,
+            transfer: <TransferDataEthereum as BorshDeserialize>::deserialize(data)?,
+            fee: <TransferDataNear as BorshDeserialize>::deserialize(data)?,
+            recipient: <EthAddress as BorshDeserialize>::deserialize(data)?,
+            valid_till_block_height: <Option<u64> as BorshDeserialize>::deserialize(data)?,
+            aurora_sender: <Option<EthAddress> as BorshDeserialize>::deserialize(data).unwrap_or(None)
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -261,5 +274,53 @@ mod tests {
         let json2 = remove_prefix(expected_result_str).unwrap();
 
         assert_json_eq!(json1, json2)
+    }
+
+    #[test]
+    fn v2_borsh_deserialization_test() {
+        let transfer_message = TransferMessage {
+                valid_till: 0,
+                valid_till_block_height: Some(0),
+                transfer: TransferDataEthereum {
+                    token_near: token(),
+                    token_eth: get_eth_address(),
+                    amount: U128(100),
+                },
+                fee: TransferDataNear {
+                    token: token(),
+                    amount: U128(100),
+                },
+                recipient: get_eth_address(),
+                aurora_sender: Some(EthAddress(<[u8;20]>::default()))};
+
+        let encode = transfer_message.try_to_vec().unwrap();
+
+        let decode_transfer_message: TransferMessage = TransferMessage::try_from_slice(&encode).unwrap();
+        assert_eq!(transfer_message, decode_transfer_message);
+    }
+
+    #[test]
+    fn v1_borsh_deserialization_test() {
+        let transfer_message = TransferMessage {
+            valid_till: 0,
+            valid_till_block_height: Some(0),
+            transfer: TransferDataEthereum {
+                token_near: token(),
+                token_eth: get_eth_address(),
+                amount: U128(100),
+            },
+            fee: TransferDataNear {
+                token: token(),
+                amount: U128(100),
+            },
+            recipient: get_eth_address(),
+            aurora_sender: None
+        };
+
+        let mut encode = transfer_message.try_to_vec().unwrap();
+        encode.pop();
+
+        let decode_transfer_message: TransferMessage = TransferMessage::try_from_slice(&encode).unwrap();
+        assert_eq!(transfer_message, decode_transfer_message);
     }
 }
