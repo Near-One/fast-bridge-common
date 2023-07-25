@@ -62,27 +62,6 @@ pub struct TransferDataNear {
     pub amount: U128,
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
-#[serde(crate = "near_sdk::serde")]
-pub struct TransferMessageV1 {
-    pub valid_till: u64,
-    pub transfer: TransferDataEthereum,
-    pub fee: TransferDataNear,
-    pub recipient: EthAddress,
-    pub valid_till_block_height: Option<u64>,
-}
-
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Debug, Clone, PartialEq)]
-#[serde(crate = "near_sdk::serde")]
-pub struct TransferMessageV2 {
-    pub valid_till: u64,
-    pub transfer: TransferDataEthereum,
-    pub fee: TransferDataNear,
-    pub recipient: EthAddress,
-    pub valid_till_block_height: Option<u64>,
-    pub aurora_sender: Option<EthAddress>,
-}
-
 #[derive(Serialize, Deserialize, BorshSerialize, Debug, Clone, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TransferMessage {
@@ -94,43 +73,16 @@ pub struct TransferMessage {
     pub aurora_sender: Option<EthAddress>,
 }
 
-impl Into<TransferMessage> for TransferMessageV1 {
-    fn into(self) -> TransferMessage {
-        TransferMessage {
-            valid_till: self.valid_till,
-            transfer: self.transfer,
-            fee: self.fee,
-            recipient: self.recipient,
-            valid_till_block_height: self.valid_till_block_height,
-            aurora_sender: None
-        }
-    }
-}
-
-impl Into<TransferMessage> for TransferMessageV2 {
-    fn into(self) -> TransferMessage {
-        TransferMessage {
-            valid_till: self.valid_till,
-            transfer: self.transfer,
-            fee: self.fee,
-            recipient: self.recipient,
-            valid_till_block_height: self.valid_till_block_height,
-            aurora_sender: self.aurora_sender
-        }
-    }
-}
-
 impl BorshDeserialize for TransferMessage {
     fn deserialize(data: &mut &[u8]) -> crate::borsh::maybestd::io::Result<Self> {
-        let transfer_message_v2 = TransferMessageV2::try_from_slice(data);
-
-        if let Ok(_) = transfer_message_v2 {
-            let transfer_message_v2 = <TransferMessageV2 as BorshDeserialize>::deserialize(data)?;
-            Ok(transfer_message_v2.into())
-        } else {
-            let transfer_message_v1 = <TransferMessageV1 as BorshDeserialize>::deserialize(data)?;
-            Ok(transfer_message_v1.into())
-        }
+        Ok(TransferMessage {
+            valid_till: <u64 as BorshDeserialize>::deserialize(data)?,
+            transfer: <TransferDataEthereum as BorshDeserialize>::deserialize(data)?,
+            fee: <TransferDataNear as BorshDeserialize>::deserialize(data)?,
+            recipient: <EthAddress as BorshDeserialize>::deserialize(data)?,
+            valid_till_block_height: <Option<u64> as BorshDeserialize>::deserialize(data)?,
+            aurora_sender: <Option<EthAddress> as BorshDeserialize>::deserialize(data).unwrap_or(None)
+        })
     }
 }
 
