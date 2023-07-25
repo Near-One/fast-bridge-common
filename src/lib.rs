@@ -323,4 +323,30 @@ mod tests {
         let decode_transfer_message: TransferMessage = TransferMessage::try_from_slice(&encode).unwrap();
         assert_eq!(transfer_message, decode_transfer_message);
     }
+
+    #[test]
+    #[should_panic(expected = "Not all bytes read")]
+    fn borsh_deserialization_no_empty_buffer_test() {
+        let transfer_message = TransferMessage {
+            valid_till: 0,
+            valid_till_block_height: Some(0),
+            transfer: TransferDataEthereum {
+                token_near: token(),
+                token_eth: get_eth_address(),
+                amount: U128(100),
+            },
+            fee: TransferDataNear {
+                token: token(),
+                amount: U128(100),
+            },
+            recipient: get_eth_address(),
+            aurora_sender: None
+        };
+
+        let mut encode = transfer_message.try_to_vec().unwrap();
+        encode.push(0);
+
+        let decode_transfer_message: TransferMessage = TransferMessage::try_from_slice(&encode).unwrap();
+        assert_eq!(transfer_message, decode_transfer_message);
+    }
 }
