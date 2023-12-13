@@ -14,8 +14,8 @@ pub struct EthAddress(pub [u8; 20]);
 
 impl<'de> Deserialize<'de> for EthAddress {
     fn deserialize<D>(deserializer: D) -> Result<Self, <D as serde::Deserializer<'de>>::Error>
-        where
-            D: serde::Deserializer<'de>,
+    where
+        D: serde::Deserializer<'de>,
     {
         let mut s = <String as Deserialize>::deserialize(deserializer)?;
         if s.starts_with("0x") {
@@ -27,9 +27,12 @@ impl<'de> Deserialize<'de> for EthAddress {
 }
 
 impl Serialize for EthAddress {
-    fn serialize<S>(&self, serializer: S) -> Result<<S as serde::Serializer>::Ok, <S as serde::Serializer>::Error>
-        where
-            S: serde::Serializer,
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> Result<<S as serde::Serializer>::Ok, <S as serde::Serializer>::Error>
+    where
+        S: serde::Serializer,
     {
         serializer.serialize_str(&hex::encode(self.0))
     }
@@ -81,7 +84,8 @@ impl BorshDeserialize for TransferMessage {
             fee: <TransferDataNear as BorshDeserialize>::deserialize(data)?,
             recipient: <EthAddress as BorshDeserialize>::deserialize(data)?,
             valid_till_block_height: <Option<u64> as BorshDeserialize>::deserialize(data)?,
-            aurora_sender: <Option<EthAddress> as BorshDeserialize>::deserialize(data).unwrap_or(None)
+            aurora_sender: <Option<EthAddress> as BorshDeserialize>::deserialize(data)
+                .unwrap_or(None),
         })
     }
 }
@@ -114,6 +118,7 @@ pub enum Event {
         amount: U128,
     },
     FastBridgeWithdrawEvent {
+        sender_id: Option<AccountId>,
         recipient_id: AccountId,
         token: AccountId,
         amount: U128,
@@ -205,7 +210,7 @@ mod tests {
                     amount: U128(amount),
                 },
                 recipient: get_eth_address(),
-                aurora_sender: Some(EthAddress(<[u8;20]>::default())),
+                aurora_sender: Some(EthAddress(<[u8; 20]>::default())),
             },
         }
         .emit();
@@ -242,7 +247,7 @@ mod tests {
                     amount: U128(amount),
                 },
                 recipient: get_eth_address(),
-                aurora_sender: Some(EthAddress(<[u8;20]>::default())),
+                aurora_sender: Some(EthAddress(<[u8; 20]>::default())),
             },
         }
         .emit();
@@ -279,23 +284,25 @@ mod tests {
     #[test]
     fn v2_borsh_deserialization_test() {
         let transfer_message = TransferMessage {
-                valid_till: 0,
-                valid_till_block_height: Some(0),
-                transfer: TransferDataEthereum {
-                    token_near: token(),
-                    token_eth: get_eth_address(),
-                    amount: U128(100),
-                },
-                fee: TransferDataNear {
-                    token: token(),
-                    amount: U128(100),
-                },
-                recipient: get_eth_address(),
-                aurora_sender: Some(EthAddress(<[u8;20]>::default()))};
+            valid_till: 0,
+            valid_till_block_height: Some(0),
+            transfer: TransferDataEthereum {
+                token_near: token(),
+                token_eth: get_eth_address(),
+                amount: U128(100),
+            },
+            fee: TransferDataNear {
+                token: token(),
+                amount: U128(100),
+            },
+            recipient: get_eth_address(),
+            aurora_sender: Some(EthAddress(<[u8; 20]>::default())),
+        };
 
         let encode = transfer_message.try_to_vec().unwrap();
 
-        let decode_transfer_message: TransferMessage = TransferMessage::try_from_slice(&encode).unwrap();
+        let decode_transfer_message: TransferMessage =
+            TransferMessage::try_from_slice(&encode).unwrap();
         assert_eq!(transfer_message, decode_transfer_message);
     }
 
@@ -314,13 +321,14 @@ mod tests {
                 amount: U128(100),
             },
             recipient: get_eth_address(),
-            aurora_sender: None
+            aurora_sender: None,
         };
 
         let mut encode = transfer_message.try_to_vec().unwrap();
         encode.pop();
 
-        let decode_transfer_message: TransferMessage = TransferMessage::try_from_slice(&encode).unwrap();
+        let decode_transfer_message: TransferMessage =
+            TransferMessage::try_from_slice(&encode).unwrap();
         assert_eq!(transfer_message, decode_transfer_message);
     }
 }
